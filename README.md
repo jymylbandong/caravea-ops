@@ -6,6 +6,7 @@ A small bookings module with full CRUD: a **Laravel 12** REST API in [`/api`](ap
 - Frontend: App Router + TypeScript, Tailwind CSS v4, shadcn/ui
 - Scope, data model and timeline: [`docs/plan.md`](docs/plan.md)
 - How AI was used, and where its output needed fixing: [`AI_NOTES.md`](AI_NOTES.md)
+- Every prompt given to Claude Code, with its replies: [`docs/prompt-history/`](docs/prompt-history/README.md)
 
 ## Requirements
 
