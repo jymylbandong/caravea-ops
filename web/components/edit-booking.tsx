@@ -23,7 +23,9 @@ export function EditBooking() {
 
     getBooking(id)
       .then((loaded) => {
-        if (!cancelled) setBooking(loaded);
+        if (cancelled) return;
+        setBooking(loaded);
+        setError(null);
       })
       .catch((e: unknown) => {
         if (cancelled) return;
@@ -72,5 +74,7 @@ export function EditBooking() {
     return <BookingFormSkeleton />;
   }
 
-  return <BookingForm booking={booking} />;
+  // This page also stays mounted while hidden and refetches when shown again. Keying on updated_at
+  // remounts the form with fresh values when the booking has changed since the form was filled in.
+  return <BookingForm key={booking.updated_at} booking={booking} />;
 }

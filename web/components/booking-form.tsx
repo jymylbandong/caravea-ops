@@ -3,7 +3,7 @@
 import { Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import { ErrorAlert, errorMessage } from "@/components/error-alert";
 import { FormField } from "@/components/form-field";
 import { Button } from "@/components/ui/button";
@@ -71,6 +71,23 @@ export function BookingForm({ booking }: { booking?: Booking }) {
   const [errors, setErrors] = useState<ValidationErrors>({});
   const [formError, setFormError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const saved = useRef(false);
+
+  // With cacheComponents, Next.js keeps pages mounted but hidden (React <Activity>) after navigating away,
+  // so returning to /bookings/new would show the last submission, still "Saving…". The cleanup runs when the
+  // page is hidden; resetting only after a successful save keeps an unsaved draft if the user leaves mid-edit.
+  // See node_modules/next/dist/docs/01-app/02-guides/preserving-ui-state.md.
+  useLayoutEffect(() => {
+    return () => {
+      if (!saved.current) return;
+      saved.current = false;
+      // A new booking starts blank next time. The edit form gets fresh values from EditBooking instead.
+      if (!booking) setValues(initialValues());
+      setErrors({});
+      setFormError(null);
+      setSubmitting(false);
+    };
+  }, [booking]);
 
   function update(field: TextField) {
     return (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
@@ -103,6 +120,7 @@ export function BookingForm({ booking }: { booking?: Booking }) {
       } else {
         await createBooking(payload);
       }
+      saved.current = true;
       router.push("/bookings");
     } catch (e) {
       if (e instanceof ApiValidationError) {
