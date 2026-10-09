@@ -86,6 +86,15 @@ A missing or non-numeric `{id}` returns `404`. Validation failures return `422`.
 
 `PUT` is a full replacement, so every required field must be sent, including `status`.
 
+**No double-booking:** a booking may not overlap another non-cancelled booking for the same `resource`. Two bookings overlap when `new.starts_at < existing.ends_at AND new.ends_at > existing.starts_at`, so back-to-back bookings (10:00–11:00 then 11:00–12:00) are allowed. A conflict returns `422` with the message on `starts_at`:
+
+```json
+{
+  "message": "This resource is already booked for an overlapping time.",
+  "errors": { "starts_at": ["This resource is already booked for an overlapping time."] }
+}
+```
+
 ### Example
 
 ```bash
@@ -146,8 +155,9 @@ Controller → Service → Repository → Model
 | Route | `routes/api.php` | `apiResource('bookings')` with a numeric `{id}` |
 | Form Request | `app/Http/Requests/StoreBookingRequest.php`, `UpdateBookingRequest.php` | All validation rules; datetimes converted to UTC first |
 | Controller | `app/Http/Controllers/Api/BookingController.php` | Thin: request → service → resource |
-| Service | `app/Services/BookingService.php` | Business rules (default `pending` status); depends on the repository interface |
-| Repository | `app/Repositories/BookingRepository.php` | All Eloquent queries; bound to `BookingRepositoryInterface` in `RepositoryServiceProvider` |
+| Service | `app/Services/BookingService.php` | Business rules (default `pending` status, overlap check); depends on the repository interface |
+| Repository | `app/Repositories/BookingRepository.php` | All Eloquent queries, including `hasOverlap()`; bound to `BookingRepositoryInterface` in `RepositoryServiceProvider` |
+| Exception | `app/Exceptions/BookingOverlapException.php` | Thrown by the service on a conflict; renders as a `422` on `starts_at` |
 | Model | `app/Models/Booking.php` | Fillable fields; casts `status` to the `BookingStatus` enum and the datetimes |
 | Resource | `app/Http/Resources/BookingResource.php` | JSON shape; datetimes as UTC ISO 8601 |
 
@@ -170,6 +180,8 @@ Tests are split the same way. `tests/Unit/Services` tests the service against a 
 - **`starts_at` must be in the future only on create.** Bookings that have already started can still be edited or cancelled.
 - **`PUT` is a full replacement.** `UpdateBookingRequest` reuses the create rules, except that `status` is required and `starts_at` may be in the past.
 - **No route model binding.** The controller takes `int $id` and the service loads the booking through the repository, so every query stays in the repository layer. `ModelNotFoundException` becomes a JSON `404`.
+- **The overlap rule is in the service, not the Form Request.** It is a business rule that needs a database query, so the service asks the repository (`hasOverlap`) and throws `BookingOverlapException`. That exception renders in the same `422` shape as validation errors, so the form shows it under **Starts** without frontend changes. Cancelled bookings never block a slot. Saving a booking as cancelled skips the check, and on update the booking is not compared with itself.
+  - *Known limitation:* the check and the insert are not atomic, so two simultaneous requests could both pass. A database-level exclusion constraint would close this gap, but SQLite doesn't support one.
 - **CORS allows only `FRONTEND_URL`.** Laravel's default is `*`.
 - **The frontend loads data in the browser.** This Next 16 setup has `cacheComponents` enabled, so request-time data in Server Components would need extra Suspense or caching setup. Loading in the browser also formats times in the user's own timezone. The forms use `noValidate`, so the messages under each field come from Laravel rather than the browser.
 
@@ -177,7 +189,8 @@ Tests are split the same way. `tests/Unit/Services` tests the service against a 
 
 **Done (must-haves):** full CRUD API, Form Request validation, SQLite, Next.js list/create/edit/delete, Pest tests, this README.
 
+**Done (nice-to-haves):** no overlapping bookings for the same resource, with tests at the service, repository and API levels.
+
 **Not done (nice-to-haves):**
-- No overlap rule for the same resource. The `(resource, starts_at)` index is already there for it.
 - No pagination.
 - Loading and error states are basic: a loading row, an empty state and inline error messages.

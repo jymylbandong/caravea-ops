@@ -5,6 +5,7 @@ use App\Models\Booking;
 use App\Repositories\BookingRepository;
 use App\Repositories\BookingRepositoryInterface;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Support\Carbon;
 
 beforeEach(function () {
     $this->repository = app(BookingRepositoryInterface::class);
@@ -57,4 +58,52 @@ it('deletes a booking', function () {
     $this->repository->delete($booking);
 
     $this->assertModelMissing($booking);
+});
+
+describe('hasOverlap', function () {
+    beforeEach(function () {
+        // Existing booking: Meeting Room A, 10:00–11:00.
+        $this->existing = Booking::factory()->create([
+            'resource' => 'Meeting Room A',
+            'starts_at' => '2030-01-15 10:00:00',
+            'ends_at' => '2030-01-15 11:00:00',
+        ]);
+    });
+
+    it('detects overlapping ranges', function (string $start, string $end) {
+        expect($this->repository->hasOverlap('Meeting Room A', Carbon::parse($start), Carbon::parse($end)))->toBeTrue();
+    })->with([
+        'same range' => ['2030-01-15 10:00:00', '2030-01-15 11:00:00'],
+        'starts during' => ['2030-01-15 10:30:00', '2030-01-15 11:30:00'],
+        'ends during' => ['2030-01-15 09:30:00', '2030-01-15 10:30:00'],
+        'inside' => ['2030-01-15 10:15:00', '2030-01-15 10:45:00'],
+        'surrounds' => ['2030-01-15 09:00:00', '2030-01-15 12:00:00'],
+    ]);
+
+    it('allows back-to-back and separate ranges', function (string $start, string $end) {
+        expect($this->repository->hasOverlap('Meeting Room A', Carbon::parse($start), Carbon::parse($end)))->toBeFalse();
+    })->with([
+        'ends when existing starts' => ['2030-01-15 09:00:00', '2030-01-15 10:00:00'],
+        'starts when existing ends' => ['2030-01-15 11:00:00', '2030-01-15 12:00:00'],
+        'different day' => ['2030-01-16 10:00:00', '2030-01-16 11:00:00'],
+    ]);
+
+    it('ignores other resources', function () {
+        expect($this->repository->hasOverlap('Meeting Room B', Carbon::parse('2030-01-15 10:00:00'), Carbon::parse('2030-01-15 11:00:00')))->toBeFalse();
+    });
+
+    it('ignores cancelled bookings', function () {
+        $this->existing->update(['status' => BookingStatus::Cancelled]);
+
+        expect($this->repository->hasOverlap('Meeting Room A', Carbon::parse('2030-01-15 10:00:00'), Carbon::parse('2030-01-15 11:00:00')))->toBeFalse();
+    });
+
+    it('ignores the booking being updated', function () {
+        expect($this->repository->hasOverlap(
+            'Meeting Room A',
+            Carbon::parse('2030-01-15 10:30:00'),
+            Carbon::parse('2030-01-15 11:30:00'),
+            $this->existing->id,
+        ))->toBeFalse();
+    });
 });

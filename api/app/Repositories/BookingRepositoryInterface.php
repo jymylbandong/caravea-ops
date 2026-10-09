@@ -5,6 +5,7 @@ namespace App\Repositories;
 use App\Models\Booking;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Support\Carbon;
 
 interface BookingRepositoryInterface
 {
@@ -31,4 +32,12 @@ interface BookingRepositoryInterface
     public function update(Booking $booking, array $data): Booking;
 
     public function delete(Booking $booking): void;
+
+    /**
+     * Whether a non-cancelled booking for the resource overlaps the given time range.
+     * Back-to-back bookings (one ends exactly when the other starts) do not overlap.
+     *
+     * @param  int|null  $ignoreId  The booking being updated, so it is not compared with itself.
+     */
+    public function hasOverlap(string $resource, Carbon $startsAt, Carbon $endsAt, ?int $ignoreId = null): bool;
 }

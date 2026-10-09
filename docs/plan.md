@@ -17,7 +17,7 @@ A small bookings module with full CRUD, built with a Laravel API and a Next.js f
 - [x] **README**
 
 ### Nice to have (if time allows)
-- [ ] No overlapping bookings for the same resource, with a test
+- [x] No overlapping bookings for the same resource, with a test
 - [ ] Pagination
 - [ ] Loading and error states in the frontend
 
@@ -67,7 +67,7 @@ DELETE /api/bookings/{id}     delete
 - [x] Rejects invalid email and out-of-range guests
 - [x] Updates a booking
 - [x] Deletes a booking
-- [ ] (Nice to have) Rejects an overlapping booking for the same resource
+- [x] (Nice to have) Rejects an overlapping booking for the same resource
 
 ---
 
