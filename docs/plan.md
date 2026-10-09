@@ -9,12 +9,12 @@ A small bookings module with full CRUD, built with a Laravel API and a Next.js f
 ## 1. Scope
 
 ### Must have
-- [ ] **Laravel API:** full CRUD for bookings
-- [ ] **Validation** with Form Requests
-- [ ] **SQLite** database, so it runs with no setup
-- [ ] **Next.js frontend:** list, create, edit, delete
-- [ ] **Pest tests** for the API
-- [ ] **README**
+- [x] **Laravel API:** full CRUD for bookings
+- [x] **Validation** with Form Requests
+- [x] **SQLite** database, so it runs with no setup
+- [x] **Next.js frontend:** list, create, edit, delete
+- [x] **Pest tests** for the API
+- [x] **README**
 
 ### Nice to have (if time allows)
 - [ ] No overlapping bookings for the same resource, with a test
@@ -62,21 +62,21 @@ DELETE /api/bookings/{id}     delete
 
 ## 4. Tests (Pest)
 
-- [ ] Creates a booking with valid data
-- [ ] Rejects `ends_at` before `starts_at`
-- [ ] Rejects invalid email and out-of-range guests
-- [ ] Updates a booking
-- [ ] Deletes a booking
+- [x] Creates a booking with valid data
+- [x] Rejects `ends_at` before `starts_at`
+- [x] Rejects invalid email and out-of-range guests
+- [x] Updates a booking
+- [x] Deletes a booking
 - [ ] (Nice to have) Rejects an overlapping booking for the same resource
 
 ---
 
 ## 5. Frontend pages
 
-- [ ] `/bookings`: list, with status badge
-- [ ] `/bookings/new`: create form
-- [ ] `/bookings/[id]/edit`: edit form
-- [ ] Delete from the list, with confirmation
+- [x] `/bookings`: list, with status badge
+- [x] `/bookings/new`: create form
+- [x] `/bookings/[id]/edit`: edit form
+- [x] Delete from the list, with confirmation
 
 **UI:** shadcn/ui with Tailwind CSS (Table for the list, Badge for status, AlertDialog for delete confirmation, form inputs for create and edit).
 
