@@ -1,7 +1,10 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  // The app has a single section, so send "/" straight to the bookings list.
+  async redirects() {
+    return [{ source: "/", destination: "/bookings", permanent: false }];
+  },
   cacheComponents: true,
   partialPrefetching: true,
   turbopack: {
