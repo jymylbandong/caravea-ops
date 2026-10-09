@@ -1,8 +1,10 @@
 "use client";
 
+import { Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { ErrorAlert, errorMessage } from "@/components/error-alert";
 import { FormField } from "@/components/form-field";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -106,7 +108,7 @@ export function BookingForm({ booking }: { booking?: Booking }) {
       if (e instanceof ApiValidationError) {
         setErrors(e.errors);
       } else {
-        setFormError(e instanceof Error ? e.message : "Something went wrong.");
+        setFormError(errorMessage(e));
       }
       setSubmitting(false);
     }
@@ -115,69 +117,69 @@ export function BookingForm({ booking }: { booking?: Booking }) {
   return (
     // noValidate: let Laravel validate, so its messages appear next to each field.
     <form onSubmit={handleSubmit} noValidate className="grid gap-6">
-      {formError && (
-        <p role="alert" className="text-sm text-destructive">
-          {formError}
-        </p>
-      )}
+      {formError && <ErrorAlert title="Could not save the booking" message={formError} />}
 
-      <div className="grid gap-6 sm:grid-cols-2">
-        <FormField id="customer_name" label="Customer name" errors={errors.customer_name}>
-          <Input {...fieldProps("customer_name")} autoComplete="name" />
-        </FormField>
+      {/* Disabling the fieldset disables every input inside it while the request is in flight. */}
+      <fieldset disabled={submitting} className="grid gap-6">
+        <div className="grid gap-6 sm:grid-cols-2">
+          <FormField id="customer_name" label="Customer name" errors={errors.customer_name}>
+            <Input {...fieldProps("customer_name")} autoComplete="name" />
+          </FormField>
 
-        <FormField id="customer_email" label="Customer email" errors={errors.customer_email}>
-          <Input {...fieldProps("customer_email")} type="email" autoComplete="email" />
-        </FormField>
+          <FormField id="customer_email" label="Customer email" errors={errors.customer_email}>
+            <Input {...fieldProps("customer_email")} type="email" autoComplete="email" />
+          </FormField>
 
-        <FormField id="resource" label="Resource" errors={errors.resource}>
-          <Input {...fieldProps("resource")} placeholder="Meeting Room A" />
-        </FormField>
+          <FormField id="resource" label="Resource" errors={errors.resource}>
+            <Input {...fieldProps("resource")} placeholder="Meeting Room A" />
+          </FormField>
 
-        <FormField id="guests" label="Guests" errors={errors.guests}>
-          <Input {...fieldProps("guests")} type="number" min={1} max={20} step={1} />
-        </FormField>
+          <FormField id="guests" label="Guests" errors={errors.guests}>
+            <Input {...fieldProps("guests")} type="number" min={1} max={20} step={1} />
+          </FormField>
 
-        <FormField id="starts_at" label="Starts" errors={errors.starts_at}>
-          <Input {...fieldProps("starts_at")} type="datetime-local" />
-        </FormField>
+          <FormField id="starts_at" label="Starts" errors={errors.starts_at}>
+            <Input {...fieldProps("starts_at")} type="datetime-local" />
+          </FormField>
 
-        <FormField id="ends_at" label="Ends" errors={errors.ends_at}>
-          <Input {...fieldProps("ends_at")} type="datetime-local" />
-        </FormField>
+          <FormField id="ends_at" label="Ends" errors={errors.ends_at}>
+            <Input {...fieldProps("ends_at")} type="datetime-local" />
+          </FormField>
 
-        <FormField id="status" label="Status" errors={errors.status}>
-          <Select
-            value={values.status}
-            onValueChange={(status) => setValues((current) => ({ ...current, status: status as BookingStatus }))}
-          >
-            <SelectTrigger
-              id="status"
-              className="w-full capitalize"
-              aria-invalid={Boolean(errors.status?.length) || undefined}
+          <FormField id="status" label="Status" errors={errors.status}>
+            <Select
+              value={values.status}
+              onValueChange={(status) => setValues((current) => ({ ...current, status: status as BookingStatus }))}
             >
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {BOOKING_STATUSES.map((status) => (
-                <SelectItem key={status} value={status} className="capitalize">
-                  {status}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </FormField>
-      </div>
+              <SelectTrigger
+                id="status"
+                className="w-full capitalize"
+                aria-invalid={Boolean(errors.status?.length) || undefined}
+              >
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {BOOKING_STATUSES.map((status) => (
+                  <SelectItem key={status} value={status} className="capitalize">
+                    {status}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </FormField>
+        </div>
 
-      <FormField id="notes" label="Notes (optional)" errors={errors.notes}>
-        <Textarea {...fieldProps("notes")} rows={4} />
-      </FormField>
+        <FormField id="notes" label="Notes (optional)" errors={errors.notes}>
+          <Textarea {...fieldProps("notes")} rows={4} />
+        </FormField>
+      </fieldset>
 
       <div className="flex justify-end gap-2">
         <Button asChild variant="outline">
           <Link href="/bookings">Cancel</Link>
         </Button>
         <Button type="submit" disabled={submitting}>
+          {submitting && <Loader2 className="animate-spin" />}
           {submitting ? "Saving…" : booking ? "Save changes" : "Create booking"}
         </Button>
       </div>

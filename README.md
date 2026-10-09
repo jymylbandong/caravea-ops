@@ -193,9 +193,12 @@ Tests are split the same way. `tests/Unit/Services` tests the service against a 
 
 **Done (must-haves):** full CRUD API, Form Request validation, SQLite, Next.js list/create/edit/delete, Pest tests, this README.
 
-**Done (nice-to-haves):** no overlapping bookings for the same resource, with tests at the service, repository and API levels.
-
-- Pagination, in both the API and the list page.
-
-**Not done (nice-to-haves):**
-- Loading and error states are basic: a loading row, an empty state and inline error messages.
+**Done (nice-to-haves):**
+- No overlapping bookings for the same resource, with tests at the service, repository and API levels.
+- Pagination in both the API and the list page.
+- Loading and error states:
+  - skeleton rows and form placeholders while loading;
+  - the old rows stay dimmed while the next page loads;
+  - error alerts with **Retry** (including a clear message when the API is unreachable);
+  - a "Booking not found" state on the edit page;
+  - empty states, and disabled inputs with spinners while saving or deleting.

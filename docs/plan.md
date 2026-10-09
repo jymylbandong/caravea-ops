@@ -19,7 +19,7 @@ A small bookings module with full CRUD, built with a Laravel API and a Next.js f
 ### Nice to have (if time allows)
 - [x] No overlapping bookings for the same resource, with a test
 - [x] Pagination
-- [ ] Loading and error states in the frontend
+- [x] Loading and error states in the frontend
 
 ---
 

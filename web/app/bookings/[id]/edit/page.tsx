@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
+import { BookingFormSkeleton } from "@/components/booking-form-skeleton";
 import { EditBooking } from "@/components/edit-booking";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -17,7 +18,7 @@ export default function EditBookingPage() {
         </CardHeader>
         <CardContent>
           {/* The [id] is only known at request time; with cacheComponents, useParams needs a Suspense boundary. */}
-          <Suspense fallback={<p className="text-sm text-muted-foreground">Loading booking…</p>}>
+          <Suspense fallback={<BookingFormSkeleton />}>
             <EditBooking />
           </Suspense>
         </CardContent>

@@ -1,5 +1,6 @@
 "use client";
 
+import { Loader2 } from "lucide-react";
 import { useState } from "react";
 import {
   AlertDialog,
@@ -12,6 +13,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { ErrorAlert, errorMessage } from "@/components/error-alert";
 import { Button } from "@/components/ui/button";
 import { deleteBooking, type Booking } from "@/lib/api";
 
@@ -36,7 +38,7 @@ export function DeleteBookingButton({ booking, onDeleted }: Props) {
       setOpen(false);
       onDeleted(booking.id);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Could not delete the booking.");
+      setError(errorMessage(e, "Could not delete the booking."));
     } finally {
       setDeleting(false);
     }
@@ -62,14 +64,11 @@ export function DeleteBookingButton({ booking, onDeleted }: Props) {
             {booking.customer_name}&apos;s booking for {booking.resource} will be permanently deleted.
           </AlertDialogDescription>
         </AlertDialogHeader>
-        {error && (
-          <p role="alert" className="text-sm text-destructive">
-            {error}
-          </p>
-        )}
+        {error && <ErrorAlert title="Could not delete the booking" message={error} />}
         <AlertDialogFooter>
           <AlertDialogCancel disabled={deleting}>Cancel</AlertDialogCancel>
           <AlertDialogAction variant="destructive" disabled={deleting} onClick={handleDelete}>
+            {deleting && <Loader2 className="animate-spin" />}
             {deleting ? "Deleting…" : "Delete"}
           </AlertDialogAction>
         </AlertDialogFooter>
