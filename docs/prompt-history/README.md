@@ -600,6 +600,113 @@ That's everything in `docs/plan.md`. What's left is filling in `AI_NOTES.md` fro
 <details>
 <summary>Claude's reply</summary>
 
-One prompt contained only a screenshot, so its text is empty after cleanup. I'm giving such prompts a fallback heading:
+I've added the prompt history to the repo and committed it as `f367f28`, `docs: add Claude Code prompt history with screenshots`.
+
+**What's in `docs/prompt-history/`**
+- **`README.md`:** all 17 of your prompts in order, word for word. Your pasted messages are shown as plain text, without the wrapper tags.
+- **My replies:** my final reply to each prompt sits under a collapsible "Claude's reply" toggle, so the prompts stay easy to scan. Tool calls, command output and system messages are left out.
+- **`screenshots/`:** your 4 screenshots (the list page, the two form-validation shots and the list with your test booking). Each one is shown under the prompt it came with.
+
+**Linked from**
+- `AI_NOTES.md`: I filled in the `Prompt history: [link or folder]` placeholder you'd left there. Nothing else in that file changed.
+- `README.md`: added to the links at the top.
+
+**Checked before committing:** the export contains no local file paths, email address or session links. It's 44 KB of text plus 800 KB of screenshots.
+
+**Two things to know**
+- **It's a snapshot.** Prompt 17, your request for this export, has no recorded reply, and anything after now isn't included. I left the export script outside the repo, in my session's temporary scratch folder. If you keep working with me, ask me to re-export at the end and I'll overwrite these files.
+- **The screenshots show your test booking** ("Jym", `testlocal@test.com`) alongside the fake seeded names. Tell me if you'd rather drop the screenshots before sharing the repo.
 
 </details>
+
+## 18. commit + push
+
+> commit + push
+
+<details>
+<summary>Claude's reply</summary>
+
+I pushed all 16 commits to `jymylbandong/caravea-ops` on `main`, and your local `main` now matches GitHub. There was nothing new to commit first, because every step had already been committed.
+
+The push includes `docs/prompt-history/screenshots/` with your test booking ("Jym", `testlocal@test.com`). If the repo is public and you'd rather those weren't there, I can remove them in a follow-up commit. They would still be in the git history unless the history is rewritten.
+
+</details>
+
+## 19. hey buddy issue on frontend after creating it goes to list page then I
+
+> hey buddy issue on frontend after creating it goes to list page then I create new booking the form show the old data. there's state issue it was not cleared after creating
+
+![Screenshot attached to prompt 19](screenshots/prompt-19-1.png)
+
+<details>
+<summary>Claude's reply</summary>
+
+The new-booking form should now start blank after a successful create. I've committed the fix as `793ede1` but not pushed it, and I couldn't try it in a browser. The type check, lint, tests and build pass.
+
+**Cause:** this Next 16 setup (`cacheComponents: true`) doesn't remove a page when you navigate away. It hides the page and keeps its state, for up to 3 pages, and shows it as it was when you come back. My form never reset after a successful save; it just navigated to `/bookings` with `submitting` still `true`. Coming back to `/bookings/new` therefore showed the old values, a disabled form and "Saving…", as in your screenshot. The edit page had a quieter version of the same bug: it could show stale values if the booking changed in between.
+
+**Fix:** I used the pattern from the bundled Next guide on preserving UI state (`preserving-ui-state.md`).
+- **`booking-form.tsx`:** after a successful save, the form resets at the moment Next hides the page, so you don't see the form empty out before the list appears.
+  - The create form goes back to blank.
+  - Both forms clear "Saving…", the disabled inputs and old error messages.
+- **`edit-booking.tsx`:** the edit form is rebuilt from scratch when the booking's `updated_at` changes, so it always shows the latest saved values. A successful reload also clears any earlier error message.
+
+**What still carries over, as Next intends:**
+- **Unsaved drafts:** if you start a new booking and click Cancel or navigate away, your draft is still there when you return. I'd keep that, but if you want Cancel to clear it too, it's a one-line change.
+- **Validation errors:** if a save fails validation and you navigate away, the error messages are still showing when you come back.
+
+**Please check:**
+1. Create a booking, then click **New booking** again. The form should be empty, with **Create booking** enabled.
+2. Edit a booking, save, then click **Edit** on it again. It should show the saved values.
+
+This is also a good `AI_NOTES.md` entry, because generated code that would be correct in older Next versions broke under the new default behaviour.
+
+Once you've confirmed it works, should I push it?
+
+</details>
+
+## 20. what does this mean?
+
+> what does this mean?
+
+![Screenshot attached to prompt 20](screenshots/prompt-20-1.png)
+
+<details>
+<summary>Claude's reply</summary>
+
+It's a harmless notice that only appears in development. You don't need to do anything about it.
+
+It comes from the Next.js dev tools overlay, the "N" logo in the corner, which only exists under `npm run dev`. According to Next's own explanation, **"Cache disabled"** means that while the page was loading, all of Next's caches were skipped. That happens in three cases:
+
+1. **"Disable cache" is ticked** in your browser's DevTools Network tab. This is the most likely one if you followed my earlier tip to set Network to "Slow 4G", since those controls sit right next to each other and the box is often on by default while DevTools is open.
+2. **You hard-reloaded** the page (Cmd+Shift+R).
+3. **Next's "draft mode" is on.** We never use it, so you can rule this out.
+
+The badge is telling you that page loads won't feel exactly like production, so it's just a heads-up for performance testing.
+
+It has no effect on this app. The bookings data is fetched in the browser with `cache: "no-store"`, so it never goes through Next's caches anyway. It's also not related to the form bug we just fixed; that was Next keeping the page alive in the background.
+
+To make it go away, untick **Disable cache** in the Network tab (or close DevTools) and do a normal reload. The **×** also dismisses it.
+
+The form fix (`793ede1`) is still committed locally and not pushed. Tell me once you've checked that the new-booking form comes back empty and I'll push it.
+
+</details>
+
+## 21. yes commit + push it
+
+> yes commit + push it
+
+<details>
+<summary>Claude's reply</summary>
+
+I pushed the form fix to GitHub. The fix was already committed as `793ede1` and there were no other changes, so there was nothing new to commit. Your local `main` and `origin/main` are now in sync.
+
+The prompt history in `docs/prompt-history/` stops at the "add the prompt history" prompt. Ask me to re-export it if you want this bug fix and the "Cache disabled" question included.
+
+</details>
+
+## 22. yes then commit + push too
+
+> yes then commit + push too
+
+*(No reply recorded yet; this prompt produced this file.)*
