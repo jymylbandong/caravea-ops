@@ -4,9 +4,11 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreBookingRequest;
+use App\Http\Requests\UpdateBookingRequest;
 use App\Http\Resources\BookingResource;
 use App\Services\BookingService;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Illuminate\Http\Response;
 
 class BookingController extends Controller
 {
@@ -29,5 +31,17 @@ class BookingController extends Controller
     {
         // A freshly created model makes the resource respond with 201 Created.
         return new BookingResource($this->bookings->create($request->validated()));
+    }
+
+    public function update(UpdateBookingRequest $request, int $id): BookingResource
+    {
+        return new BookingResource($this->bookings->update($id, $request->validated()));
+    }
+
+    public function destroy(int $id): Response
+    {
+        $this->bookings->delete($id);
+
+        return response()->noContent();
     }
 }
