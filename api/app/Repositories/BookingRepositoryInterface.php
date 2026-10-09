@@ -4,6 +4,7 @@ namespace App\Repositories;
 
 use App\Models\Booking;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 interface BookingRepositoryInterface
 {
@@ -15,7 +16,7 @@ interface BookingRepositoryInterface
     public function all(): Collection;
 
     /**
-     * @throws \Illuminate\Database\Eloquent\ModelNotFoundException
+     * @throws ModelNotFoundException
      */
     public function findOrFail(int $id): Booking;
 
