@@ -15,13 +15,27 @@ it('binds the interface to the Eloquent repository', function () {
     expect($this->repository)->toBeInstanceOf(BookingRepository::class);
 });
 
-it('returns all bookings sorted by starts_at ascending', function () {
+it('returns bookings sorted by starts_at ascending', function () {
     $later = Booking::factory()->create(['starts_at' => now()->addDays(3), 'ends_at' => now()->addDays(3)->addHour()]);
     $soonest = Booking::factory()->create(['starts_at' => now()->addDay(), 'ends_at' => now()->addDay()->addHour()]);
     $middle = Booking::factory()->create(['starts_at' => now()->addDays(2), 'ends_at' => now()->addDays(2)->addHour()]);
 
-    expect($this->repository->all()->pluck('id')->all())
+    expect($this->repository->paginate(10, 1)->pluck('id')->all())
         ->toBe([$soonest->id, $middle->id, $later->id]);
+});
+
+it('paginates bookings', function () {
+    $bookings = collect(range(1, 5))->map(fn (int $day) => Booking::factory()->create([
+        'starts_at' => now()->addDays($day),
+        'ends_at' => now()->addDays($day)->addHour(),
+    ]));
+
+    $page = $this->repository->paginate(2, 2);
+
+    expect($page->pluck('id')->all())->toBe([$bookings[2]->id, $bookings[3]->id])
+        ->and($page->total())->toBe(5)
+        ->and($page->lastPage())->toBe(3)
+        ->and($page->currentPage())->toBe(2);
 });
 
 it('finds a booking by id', function () {

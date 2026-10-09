@@ -4,18 +4,18 @@ namespace App\Repositories;
 
 use App\Enums\BookingStatus;
 use App\Models\Booking;
-use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Carbon;
 
 class BookingRepository implements BookingRepositoryInterface
 {
-    public function all(): Collection
+    public function paginate(int $perPage, int $page): LengthAwarePaginator
     {
-        // id breaks ties so bookings with the same start time keep a stable order.
+        // id breaks ties so bookings with the same start time keep a stable order across pages.
         return Booking::query()
             ->orderBy('starts_at')
             ->orderBy('id')
-            ->get();
+            ->paginate(perPage: $perPage, page: $page);
     }
 
     public function findOrFail(int $id): Booking

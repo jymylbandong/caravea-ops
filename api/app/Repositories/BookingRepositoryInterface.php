@@ -3,18 +3,18 @@
 namespace App\Repositories;
 
 use App\Models\Booking;
-use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Carbon;
 
 interface BookingRepositoryInterface
 {
     /**
-     * All bookings, soonest first.
+     * One page of bookings, soonest first.
      *
-     * @return Collection<int, Booking>
+     * @return LengthAwarePaginator<int, Booking>
      */
-    public function all(): Collection;
+    public function paginate(int $perPage, int $page): LengthAwarePaginator;
 
     /**
      * @throws ModelNotFoundException

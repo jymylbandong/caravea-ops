@@ -63,13 +63,17 @@ Base URL: `http://localhost:8000/api`. Send `Accept: application/json`, although
 
 | Method | Path | Description | Success |
 |---|---|---|---|
-| `GET` | `/bookings` | List all bookings, soonest `starts_at` first | `200` |
+| `GET` | `/bookings` | List bookings, soonest `starts_at` first, paginated | `200` |
 | `POST` | `/bookings` | Create a booking | `201` |
 | `GET` | `/bookings/{id}` | Show one booking | `200` |
 | `PUT` | `/bookings/{id}` | Replace a booking (full payload) | `200` |
 | `DELETE` | `/bookings/{id}` | Delete a booking | `204` |
 
 A missing or non-numeric `{id}` returns `404`. Validation failures return `422`.
+
+### Pagination
+
+`GET /bookings` accepts `?page=` (default `1`) and `?per_page=` (default `10`, max `100`). The response is Laravel's paginated resource format: `data`, plus `links` (`first`, `last`, `prev`, `next`) and `meta` (`current_page`, `last_page`, `per_page`, `total`, `from`, `to`). A page past the end returns an empty `data` array. The frontend keeps the page in the URL (`/bookings?page=2`).
 
 ### Fields and validation
 
@@ -191,6 +195,7 @@ Tests are split the same way. `tests/Unit/Services` tests the service against a 
 
 **Done (nice-to-haves):** no overlapping bookings for the same resource, with tests at the service, repository and API levels.
 
+- Pagination, in both the API and the list page.
+
 **Not done (nice-to-haves):**
-- No pagination.
 - Loading and error states are basic: a loading row, an empty state and inline error messages.

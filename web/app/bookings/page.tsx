@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { Suspense } from "react";
 import { BookingsTable } from "@/components/bookings-table";
 import { Button } from "@/components/ui/button";
 import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -22,7 +23,10 @@ export default function BookingsPage() {
           </CardAction>
         </CardHeader>
         <CardContent>
-          <BookingsTable />
+          {/* The table reads ?page= with useSearchParams, which needs a Suspense boundary under cacheComponents. */}
+          <Suspense fallback={<p className="text-sm text-muted-foreground">Loading bookings…</p>}>
+            <BookingsTable />
+          </Suspense>
         </CardContent>
       </Card>
     </main>

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\IndexBookingRequest;
 use App\Http\Requests\StoreBookingRequest;
 use App\Http\Requests\UpdateBookingRequest;
 use App\Http\Resources\BookingResource;
@@ -16,9 +17,13 @@ class BookingController extends Controller
         private readonly BookingService $bookings,
     ) {}
 
-    public function index(): AnonymousResourceCollection
+    // A paginated collection adds "links" and "meta" (current_page, last_page, total, ...) next to "data".
+    public function index(IndexBookingRequest $request): AnonymousResourceCollection
     {
-        return BookingResource::collection($this->bookings->list());
+        // withQueryString() keeps ?per_page=... in the prev/next links.
+        return BookingResource::collection(
+            $this->bookings->list($request->page(), $request->perPage())->withQueryString()
+        );
     }
 
     // Takes an id rather than route model binding, so the lookup goes through the repository.

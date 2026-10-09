@@ -6,7 +6,7 @@ use App\Enums\BookingStatus;
 use App\Exceptions\BookingOverlapException;
 use App\Models\Booking;
 use App\Repositories\BookingRepositoryInterface;
-use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Carbon;
 
 class BookingService
@@ -15,12 +15,14 @@ class BookingService
         private readonly BookingRepositoryInterface $bookings,
     ) {}
 
+    public const DEFAULT_PER_PAGE = 10;
+
     /**
-     * @return Collection<int, Booking>
+     * @return LengthAwarePaginator<int, Booking>
      */
-    public function list(): Collection
+    public function list(int $page = 1, int $perPage = self::DEFAULT_PER_PAGE): LengthAwarePaginator
     {
-        return $this->bookings->all();
+        return $this->bookings->paginate($perPage, $page);
     }
 
     public function find(int $id): Booking

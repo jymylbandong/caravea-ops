@@ -5,8 +5,8 @@ use App\Exceptions\BookingOverlapException;
 use App\Models\Booking;
 use App\Repositories\BookingRepositoryInterface;
 use App\Services\BookingService;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Carbon;
 
 // The service is tested against a mocked repository, so no database is involved.
@@ -23,11 +23,20 @@ beforeEach(function () {
     ];
 });
 
-it('lists bookings from the repository', function () {
-    $bookings = new Collection([new Booking, new Booking]);
-    $this->repository->shouldReceive('all')->once()->andReturn($bookings);
+it('lists a page of bookings from the repository', function () {
+    $page = new LengthAwarePaginator([new Booking, new Booking], total: 12, perPage: 5, currentPage: 2);
+    $this->repository->shouldReceive('paginate')->once()->with(5, 2)->andReturn($page);
 
-    expect($this->service->list())->toBe($bookings);
+    expect($this->service->list(page: 2, perPage: 5))->toBe($page);
+});
+
+it('uses the default page size', function () {
+    $this->repository->shouldReceive('paginate')
+        ->once()
+        ->with(BookingService::DEFAULT_PER_PAGE, 1)
+        ->andReturn(new LengthAwarePaginator([], 0, BookingService::DEFAULT_PER_PAGE));
+
+    $this->service->list();
 });
 
 it('finds a booking by id', function () {

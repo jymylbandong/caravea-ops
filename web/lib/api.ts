@@ -36,6 +36,22 @@ export interface UpdateBookingInput extends CreateBookingInput {
   status: BookingStatus;
 }
 
+/** Laravel's pagination "meta" (only the fields the frontend uses). */
+export interface PaginationMeta {
+  current_page: number;
+  last_page: number;
+  per_page: number;
+  total: number;
+  from: number | null; // 1-based position of the first item on this page; null when the page is empty
+  to: number | null;
+}
+
+/** A paginated API Resource collection. */
+export interface Paginated<T> {
+  data: T[];
+  meta: PaginationMeta;
+}
+
 /** Laravel's 422 "errors" object: field name to list of messages. */
 export type ValidationErrors = Partial<Record<keyof CreateBookingInput, string[]>> &
   Record<string, string[] | undefined>;
@@ -96,8 +112,13 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
 // Laravel API Resources wrap single items and collections in { data: ... }.
 type Wrapped<T> = { data: T };
 
-export async function listBookings(): Promise<Booking[]> {
-  return (await request<Wrapped<Booking[]>>("/bookings")).data;
+export async function listBookings({ page = 1, perPage }: { page?: number; perPage?: number } = {}): Promise<
+  Paginated<Booking>
+> {
+  const params = new URLSearchParams({ page: String(page) });
+  if (perPage) params.set("per_page", String(perPage));
+
+  return request<Paginated<Booking>>(`/bookings?${params}`);
 }
 
 export async function getBooking(id: number | string): Promise<Booking> {
